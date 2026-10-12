@@ -1,0 +1,10 @@
+# Se genera con scripts/preparar_publicacion.py (Netlify la crea al publicar)
+publicar/
+__pycache__/
+
+# Primer prototipo, reemplazado por la app actual
+rutas-barranquilla/
+
+# Configuración local del editor y de Claude
+.claude/
+.vscode/

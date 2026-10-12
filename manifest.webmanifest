@@ -1,0 +1,16 @@
+{
+  "name": "Pa' Donde · Rutas de buses en Barranquilla",
+  "short_name": "Pa' Donde",
+  "description": "Rutas de buses en Barranquilla y su área metropolitana: Transmetro, buses tradicionales y cómo llegar.",
+  "lang": "es-CO",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0B3D91",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

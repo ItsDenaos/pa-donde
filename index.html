@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pa' Donde · Rutas de buses en Barranquilla y su área metropolitana</title>
+  <meta name="description" content="Muévete por Barranquilla y su área metropolitana sin perderte: rutas de Transmetro y buses tradicionales.">
+  <meta name="theme-color" content="#0B3D91">
+  <!-- Vista previa al compartir un enlace (WhatsApp, Facebook, X). La dirección del sitio la
+       completa scripts/preparar_publicacion.py: las imágenes de vista previa necesitan URL completa. -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:site_name" content="Pa' Donde">
+  <meta property="og:title" content="Pa' Donde · Rutas de buses en Barranquilla">
+  <meta property="og:description" content="Transmetro y buses tradicionales: busca a dónde vas y mira qué bus tomar, cuánto tardas y cuánto cuesta.">
+  <meta property="og:image" content="assets/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Pa' Donde: rutas de buses en Barranquilla y su área metropolitana">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/icono.svg" type="image/svg+xml">
+  <!-- Para instalarla como app en el celular -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Pa' Donde">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <aside id="panel">
+    <button id="sheet-handle" class="sheet-handle" type="button" aria-label="Agrandar o achicar la lista"></button>
+    <header class="brand">
+      <img src="assets/icono.svg" alt="" width="40" height="40">
+      <div>
+        <h1 class="wordmark"><span>Pa’</span> Donde</h1>
+        <p class="tagline">Rutas de buses en Barranquilla<br>y su área metropolitana</p>
+      </div>
+    </header>
+    <div class="brand-strip" aria-hidden="true"></div>
+
+    <div id="panel-scroll" class="panel-scroll">
+      <div id="status" class="status" role="status" hidden></div>
+
+      <!-- Vista 1: lista de rutas -->
+      <section id="browse">
+        <div class="search-wrap">
+          <label class="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input id="search" type="search" enterkeyhint="search" placeholder="¿Pa’ dónde vas?"
+                   autocomplete="off" aria-label="Buscar un lugar o una ruta">
+          </label>
+          <button id="plan" class="plan-btn" type="button" aria-label="Cómo llegar: elige salida y llegada" title="Cómo llegar: elige salida y llegada"></button>
+        </div>
+        <div id="picking" class="near" role="status" hidden></div>
+        <div id="near" class="near" role="status" hidden></div>
+        <p id="hint" class="hint">Escribe a dónde vas, o toca una ruta de la lista o del mapa para ver su recorrido.
+          <button type="button" class="link-btn" data-action="open-guide">¿Cómo se usa?</button></p>
+        <div id="groups"></div>
+        <details id="about" class="about" hidden>
+          <summary>Sobre los datos</summary>
+          <div id="about-body"></div>
+        </details>
+      </section>
+
+      <!-- Vista 2: una ruta -->
+      <section id="route" hidden></section>
+
+      <!-- Vista 3: cómo llegar a un lugar -->
+      <section id="trip" hidden></section>
+    </div>
+  </aside>
+
+  <main id="map"></main>
+
+  <!-- Ventanas: compartir, reportar un error y la guía de la primera vez (se llenan desde app.js) -->
+  <dialog id="share-dialog" class="dialog" aria-labelledby="share-title"></dialog>
+  <dialog id="report-dialog" class="dialog" aria-labelledby="report-title"></dialog>
+  <dialog id="guide" class="dialog guide" aria-labelledby="guide-title"></dialog>
+
+  <!-- Aparece solo cuando el navegador permite instalar la app -->
+  <button id="install" class="install" type="button" hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg><span>Instalar app</span>
+  </button>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.js"
+          integrity="sha256-iLeBN0QkxLMh9Y1XGnwg2FTLq1OKNJwP3Ysc8H8qLiA=" crossorigin=""></script>
+  <script src="planner.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

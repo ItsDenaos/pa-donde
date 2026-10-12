@@ -1,0 +1,755 @@
+/* Pa' Donde: paleta de la guía de marca. El azul secundario (#00AEEF) y el amarillo
+   no tienen contraste suficiente para texto sobre blanco: se usan como acento, no para leer. */
+:root {
+  --navy: #0B3D91;
+  --sky: #00AEEF;
+  --green: #7ED321;
+  --yellow: #FFD600;
+
+  --bg: #ffffff;
+  --panel: #F5F7FB;
+  --text: #1F2937;
+  --muted: #6B7280;
+  --border: #E5E7EB;
+  --link: #1565C0;
+  --hover: #EAF0FA;
+  --wordmark-1: var(--navy);
+  --wordmark-2: #1565C0;
+  --error: #B42318;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0A1730;
+    --panel: #0D1D3B;
+    --text: #E8EEF8;
+    --muted: #9AA8BF;
+    --border: #1E3357;
+    --link: var(--sky);
+    --hover: #13284B;
+    --wordmark-1: #ffffff;
+    --wordmark-2: var(--sky);
+    --error: #FF8A80;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html, body { height: 100%; margin: 0; }
+
+body {
+  display: grid;
+  grid-template-columns: min(380px, 52vw) minmax(0, 1fr); /* en un celular acostado, la lista no tapa todo el mapa */
+  grid-template-rows: minmax(0, 1fr);
+  font: 14px/1.45 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+
+#panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+}
+
+.panel-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+
+#map { min-height: 0; }
+.tiles-muted { filter: saturate(0.35) brightness(1.05); }
+
+.sheet-handle { display: none; }
+
+/* ---------- Marca ---------- */
+
+.brand { display: flex; align-items: center; gap: 14px; padding: 14px 18px 12px; }
+.brand > div { min-width: 0; }
+.brand img { flex: none; width: 60px; height: 60px; }
+.wordmark {
+  margin: 0;
+  font: 800 26px/1 Montserrat, sans-serif;
+  letter-spacing: -0.02em;
+  color: var(--wordmark-2);
+}
+.wordmark span { color: var(--wordmark-1); }
+/* El subtítulo ocupa dos líneas parejas ("Rutas de buses en Barranquilla / y su área metropolitana"). */
+.tagline { margin: 4px 0 0; font-size: 13px; line-height: 1.35; color: var(--muted); text-wrap: balance; }
+
+.brand-strip {
+  flex: none;
+  height: 4px;
+  background: linear-gradient(90deg, var(--green) 0 33%, var(--sky) 33% 66%, var(--yellow) 66%);
+}
+
+/* ---------- Lista ---------- */
+
+.status { margin: 12px 16px 0; padding: 8px 10px; border-radius: 10px; background: var(--hover); }
+.status.error { color: var(--error); }
+.status a { color: var(--link); }
+
+.search-wrap { position: sticky; top: 0; z-index: 1; padding: 14px 16px 8px; background: var(--panel); }
+.search { position: relative; display: block; }
+.search svg {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.search input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.search input:focus { outline: none; border-color: var(--sky); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sky) 25%, transparent); }
+
+.hint { margin: 4px 18px 0; font-size: 13px; color: var(--muted); }
+
+.near {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 16px 0;
+  padding: 9px 12px;
+  font-size: 13px;
+  background: color-mix(in srgb, var(--sky) 12%, transparent);
+  border-left: 3px solid var(--sky);
+  border-radius: 8px;
+}
+.near > span { flex: 1; }
+.near svg { flex: none; width: 16px; height: 16px; fill: none; stroke: var(--link); stroke-width: 2; }
+.near.error { border-left-color: var(--yellow); background: color-mix(in srgb, var(--yellow) 14%, transparent); }
+
+.link-btn { padding: 0; border: 0; background: none; color: var(--link); font: 600 13px Inter, sans-serif; cursor: pointer; }
+.link-btn:hover { text-decoration: underline; }
+
+.group h3 {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  padding: 16px 18px 6px;
+  font: 700 12px/1 Montserrat, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.group h3 span { font-weight: 600; }
+
+.list { list-style: none; margin: 0; padding: 0 8px; }
+.empty { margin: 16px 18px; color: var(--muted); }
+
+.route-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.route-item:hover { background: var(--hover); }
+.route-item .txt { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.route-item .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; font-size: 15px; }
+.route-item .meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--muted); }
+.chevron { flex: none; width: 18px; height: 18px; fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.ref {
+  flex: none;
+  min-width: 48px;
+  padding: 4px 7px;
+  border-radius: 8px;
+  background: var(--c, #6B7280);
+  color: var(--ink, #fff);
+  font: 700 13px/1.3 Montserrat, sans-serif;
+  text-align: center;
+}
+
+/* Empresas de buses colectivos: carpetas que se despliegan, como en el visor del AMB */
+.company { margin: 0 8px; }
+.company + .company { border-top: 1px solid var(--border); }
+.company summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 8px 10px;
+  list-style: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+}
+.company summary::-webkit-details-marker { display: none; }
+.company summary:hover { background: var(--hover); }
+.company-name { flex: 1; min-width: 0; }
+.company-count { font-size: 12px; font-weight: 500; color: var(--muted); }
+.company summary .chevron { transition: transform 0.15s; }
+.company[open] summary .chevron { transform: rotate(90deg); }
+.company .list { padding: 0 0 8px 10px; border-left: 2px solid var(--border); margin: 0 0 4px 18px; }
+.company .subgroup {
+  display: flex;
+  justify-content: space-between;
+  margin: 6px 10px 4px 18px;
+  padding-left: 12px;
+  font: 700 11px/1.4 Montserrat, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.company .subgroup span { font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .company summary .chevron { transition: none; } }
+
+/* ---------- Tus lugares y rutas ---------- */
+
+.fav-icon { flex: none; width: 20px; height: 20px; fill: none; stroke: var(--link); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.place-item .add { flex: none; font-size: 13px; font-weight: 600; color: var(--link); }
+.mine h3 { align-items: center; }
+.mine h3 .link-btn { font: 600 12px Inter, sans-serif; letter-spacing: 0; text-transform: none; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  font: 500 13px Inter, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.chip-btn:hover { border-color: var(--muted); }
+.chip-btn .fav-icon { width: 16px; height: 16px; }
+
+.save-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+.save-row > .fav-icon { width: 18px; height: 18px; }
+
+/* Estrella para guardar una ruta: amarilla cuando está guardada */
+.star {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  margin-left: auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg);
+  cursor: pointer;
+}
+.star:hover { background: var(--hover); }
+.star .fav-icon { stroke: var(--muted); }
+.star[aria-pressed="true"] .fav-icon { fill: var(--yellow); stroke: #B89600; }
+
+.star + .star { margin-left: 6px; } /* compartir, junto a la estrella */
+
+/* ---------- Cómo llegar: salida y llegada ---------- */
+
+.search-wrap { display: flex; gap: 8px; }
+.search-wrap .search { flex: 1; min-width: 0; }
+.plan-btn {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 48px;
+  padding: 0;
+  color: #fff;
+  background: var(--navy);
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.plan-btn svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.plan-btn:hover { filter: brightness(1.15); }
+
+.od {
+  position: relative;
+  margin-top: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.od-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 52px 8px 14px;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.od-row + .od-row { border-top: 1px solid var(--border); }
+.od-row:hover { background: var(--hover); }
+.od-row.active { background: color-mix(in srgb, var(--sky) 10%, transparent); }
+.od-row:first-child { border-radius: 12px 12px 0 0; }
+.od-row:nth-child(2) { border-radius: 0 0 12px 12px; }
+.od-text { display: flex; flex-direction: column; min-width: 0; }
+.od-label { font-size: 12px; color: var(--muted); }
+.od-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+/* Salida: punto azul claro. Llegada: punto azul oscuro con centro amarillo (como en el mapa). */
+.od-dot { flex: none; width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--border); }
+.od-from { background: var(--sky); }
+.od-to { background: var(--navy); border: 3.5px solid var(--yellow); }
+.od-swap {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  transform: translateY(-50%);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.od-swap:hover { background: var(--hover); }
+.od-editor { margin-top: 10px; }
+.od-editor .list { padding: 6px 0 0; }
+.pick .od-dot { box-shadow: none; }
+
+/* Punto de salida en el mapa (se puede arrastrar) */
+.origin-icon span {
+  display: block;
+  width: 24px;
+  height: 24px;
+  background: var(--sky);
+  border: 4px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
+}
+/* Mientras se elige un punto en el mapa */
+.leaflet-container.picking-point { cursor: crosshair; }
+
+/* ---------- Ventanas: compartir, reportar, guía ---------- */
+
+.dialog {
+  width: min(92vw, 380px);
+  padding: 22px 20px 16px;
+  color: var(--text);
+  background: var(--bg);
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .35);
+}
+.dialog::backdrop { background: rgba(5, 16, 38, .55); }
+.dialog h2 { margin: 0 0 6px; font: 700 18px/1.3 Montserrat, sans-serif; }
+.dialog p { margin: 0; }
+.dialog-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+.dialog .primary { text-decoration: none; }
+.dialog-close { display: block; margin: 14px auto 0; }
+.share-url {
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 10px;
+  font: 13px Inter, sans-serif;
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.problems { display: grid; gap: 8px; margin: 14px 0 0; padding: 0; border: 0; font-size: 14px; }
+.problems legend { margin-bottom: 6px; font-weight: 600; }
+.problems label { display: flex; align-items: flex-start; gap: 8px; }
+.comment { display: grid; gap: 6px; margin-top: 14px; font-size: 14px; font-weight: 600; }
+.comment textarea {
+  padding: 8px 10px;
+  font: 14px Inter, sans-serif;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  resize: vertical;
+}
+.report-btn { margin-top: 10px; }
+
+.guide { text-align: center; }
+.guide-icon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 10px;
+  padding: 14px;
+  fill: none;
+  stroke: var(--link);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  background: color-mix(in srgb, var(--sky) 15%, transparent);
+  border-radius: 50%;
+}
+.guide p { color: var(--muted); line-height: 1.5; }
+.guide-dots { display: flex; justify-content: center; gap: 6px; margin-top: 18px; }
+.guide-dots span { width: 8px; height: 8px; background: var(--border); border-radius: 4px; transition: width 0.2s; }
+.guide-dots .on { width: 22px; background: var(--sky); }
+.guide .dialog-actions { justify-content: space-between; }
+.guide .dialog-actions .primary:only-child { margin: 0 auto; }
+@media (prefers-reduced-motion: reduce) { .guide-dots span { transition: none; } }
+
+/* Botón "Instalar": flota en la esquina superior derecha, sobre el mapa (solo aparece
+   cuando el navegador permite instalar la app) */
+.install {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  right: 12px;
+  z-index: 1100; /* encima de los controles del mapa */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  font: 600 14px Inter, sans-serif;
+  color: #fff;
+  background: var(--navy);
+  border: 2px solid #fff;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.install svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.install:hover { filter: brightness(1.15); }
+
+/* ---------- Buscar lugares ---------- */
+
+.place-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+}
+.place-item:hover { background: var(--hover); }
+.place-item .txt { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.place-item .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.place-item .meta { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--muted); }
+svg.pin { flex: none; width: 20px; height: 20px; fill: none; stroke: var(--link); stroke-width: 2; }
+.note { margin: 8px 18px; font-size: 13px; color: var(--muted); }
+.note.error { color: var(--error); }
+
+/* ---------- Cómo llegar ---------- */
+
+.ask-origin {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.ask-origin p { margin: 0; }
+.ask-title { font: 700 15px Montserrat, sans-serif; }
+.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font: 600 14px Inter, sans-serif;
+  color: #fff;
+  background: var(--navy);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.primary svg.pin { stroke: #fff; }
+.primary:hover { filter: brightness(1.15); }
+
+.options { display: grid; gap: 8px; list-style: none; margin: 16px 0 12px; padding: 0; }
+.option { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; }
+.option.selected { border-color: var(--sky); box-shadow: 0 0 0 1px var(--sky); }
+.option-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.opt-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.opt-badges .ref { min-width: 44px; }
+.sep { font-style: normal; font-weight: 700; color: var(--muted); }
+.opt-time { font: 700 18px/1 Montserrat, sans-serif; font-variant-numeric: tabular-nums; }
+.opt-meta { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.walk-badge { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }
+svg.walk { flex: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+.steps { display: grid; gap: 12px; list-style: none; margin: 0; padding: 4px 14px 14px; border-top: 1px solid var(--border); }
+.steps .step { display: flex; align-items: flex-start; gap: 10px; padding-top: 10px; font-size: 14px; }
+.steps .step .ref { min-width: 44px; }
+.steps .step svg.walk { width: 44px; color: var(--muted); }
+.steps .link-btn { margin-left: 4px; }
+.empty-trip { margin: 16px 0; color: var(--muted); }
+
+.dest-icon svg { display: block; width: 30px; height: 38px; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .35)); }
+
+.about { margin: 16px 18px 20px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 13px; }
+.about summary { font-weight: 600; color: var(--muted); cursor: pointer; }
+.about p { margin: 8px 0 0; color: var(--muted); }
+.about strong { color: var(--text); }
+.about a { color: var(--link); font-weight: 500; }
+
+/* ---------- Ficha de ruta ---------- */
+
+.route-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--panel);
+  border-bottom: 3px solid var(--c);
+}
+.back {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+.back:hover { background: var(--hover); }
+.back svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.route-title { min-width: 0; }
+.route-title h2 { margin: 0; font: 700 16px/1.25 Montserrat, sans-serif; }
+.route-title p { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+
+.route-body { padding: 4px 16px 20px; }
+
+.near-info {
+  margin: 12px 0 0;
+  padding: 9px 11px;
+  font-size: 13px;
+  background: color-mix(in srgb, var(--sky) 10%, transparent);
+  border-radius: 8px;
+}
+.near-info .link-btn { font-size: inherit; text-align: left; }
+
+.section {
+  margin: 18px 0 8px;
+  font: 700 12px/1 Montserrat, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+/* "Por dónde pasa": cada calle como una etiqueta, sin flechas */
+.street-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.street-chips li { padding: 3px 10px; font-size: 13px; font-weight: 500; background: var(--hover); border-radius: 999px; }
+.more-streets { margin-top: 8px; }
+
+/* Paradas como línea de tiempo con el color de la ruta */
+.stops { list-style: none; margin: 0; padding: 0; font-size: 14px; }
+.stops li { position: relative; padding-left: 24px; }
+.stops li::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--c);
+}
+.stops li:first-child::before { top: 13px; }
+.stops li:last-child::before { bottom: calc(100% - 13px); }
+.stops li::after {
+  content: "";
+  position: absolute;
+  left: 1.5px;
+  top: 8px;
+  width: 12px;
+  height: 12px;
+  border: 2.5px solid var(--c);
+  border-radius: 50%;
+  background: var(--bg);
+}
+.stops li.is-station::after { left: 0.5px; top: 7px; width: 14px; height: 14px; border-width: 3.5px; border-radius: 4px; }
+.stops button {
+  padding: 5px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.stops button:hover { color: var(--link); }
+.stops li.is-station button { font-weight: 600; }
+/* La estación o parada que se tocó (también se resalta en el mapa) */
+.stops li.active button { color: var(--link); font-weight: 700; }
+.stops li.active::after { background: var(--c); }
+.stops .tag {
+  margin-left: 6px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c) 18%, transparent);
+}
+
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin: 16px 0 0; font-size: 12px; color: var(--muted); }
+.legend span { display: inline-block; margin-left: 6px; }
+.legend span:first-child { margin-left: 0; }
+.lg-stop { width: 10px; height: 10px; border: 2.5px solid var(--c); border-radius: 50%; }
+.lg-station { width: 11px; height: 11px; border: 3px solid var(--c); border-radius: 3px; }
+.lg-arrow { width: 18px; line-height: 14px; border-radius: 3px; background: var(--c); color: #fff; font-weight: 700; text-align: center; }
+
+.links { margin: 12px 0 0; font-size: 13px; }
+.links a { color: var(--link); font-weight: 500; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+
+/* ---------- Mapa ---------- */
+
+.leaflet-container { font-family: Inter, system-ui, sans-serif; }
+.leaflet-bar a { color: var(--navy); }
+.leaflet-tooltip { font: 500 12px Inter, sans-serif; border-radius: 6px; }
+
+.locate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font: 600 14px Inter, sans-serif;
+  color: #fff;
+  background: var(--navy);
+  border: 2px solid #fff;
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .3);
+  cursor: pointer;
+}
+.locate svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+.locate:hover { filter: brightness(1.15); }
+.locate.loading { opacity: 0.8; cursor: progress; }
+.locate.loading svg { animation: pulse 1s ease-in-out infinite alternate; }
+@keyframes pulse { to { transform: scale(0.75); } }
+
+/* Estación en el mapa: cuadro blanco con el borde del color de la ruta */
+.station-icon span {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border: 3.5px solid var(--c);
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .35);
+}
+
+/* Estación o parada resaltada: anillo que late y nombre fijo encima */
+.stop-pulse { transform-box: fill-box; transform-origin: center; animation: stop-pulse 1.6s ease-out infinite; }
+@keyframes stop-pulse {
+  from { transform: scale(0.6); stroke-opacity: 1; fill-opacity: 0.35; }
+  to { transform: scale(1.6); stroke-opacity: 0; fill-opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .stop-pulse { animation: none; } }
+.leaflet-tooltip.stop-label { font: 700 13px Inter, sans-serif; color: #1F2937; }
+
+/* Selector cuando varias rutas pasan por donde se tocó el mapa (el popup siempre es claro) */
+.pick-popup .leaflet-popup-content { margin: 10px; }
+.pick-box { display: grid; gap: 2px; min-width: 220px; }
+.pick-title { margin: 0 0 4px !important; font: 600 12px Inter, sans-serif; color: #6B7280; }
+.pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: #1F2937;
+  font: 500 13px Inter, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+.pick:hover { background: #EAF0FA; }
+.pick .ref { min-width: 44px; }
+
+/* ---------- Móvil: mapa arriba, lista abajo ---------- */
+
+/* Celular vertical: mapa arriba y lista abajo. Acostado usa la vista de lado a lado de arriba. */
+@media (max-width: 760px) and (orientation: portrait) {
+  body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 50dvh;
+  }
+  body.sheet-expanded { grid-template-rows: 28dvh minmax(0, 1fr); }
+  #map { grid-row: 1; }
+  #panel { grid-row: 2; border-right: 0; border-top: 1px solid var(--border); box-shadow: 0 -4px 16px rgba(0, 0, 0, .12); }
+
+  .sheet-handle {
+    display: block;
+    flex: none;
+    width: 100%;
+    height: 18px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .sheet-handle::before {
+    content: "";
+    display: block;
+    width: 40px;
+    height: 4px;
+    margin: 0 auto;
+    border-radius: 2px;
+    background: var(--border);
+  }
+  .brand { gap: 12px; padding: 0 16px 8px; }
+  .brand img { width: 50px; height: 50px; }
+  .wordmark { font-size: 20px; }
+  .tagline { margin-top: 2px; font-size: 12px; }
+  .brand-strip { height: 3px; }
+  .leaflet-control-zoom { display: none; }
+}

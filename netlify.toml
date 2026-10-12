@@ -1,0 +1,9 @@
+# Configuración para Netlify cuando el sitio se conecta con un repositorio (GitHub).
+# Si en cambio arrastras la carpeta publicar/ a https://app.netlify.com/drop, este archivo
+# no se usa: los encabezados van en publicar/_headers.
+
+[build]
+  # Copia a publicar/ solo lo que necesita la página. Netlify le pasa la dirección del
+  # sitio en la variable URL (para la vista previa de enlaces compartidos).
+  command = "python3 scripts/preparar_publicacion.py"
+  publish = "publicar"
