@@ -20,6 +20,7 @@ const APP_FILES = [
   'data/rutas.geojson',
   'data/rutas_amb.geojson',
   'data/lugares.json',
+  'data/fotos.json', // las fotos se guardan a medida que se ven
 ];
 // Librerías y tipografías de otros sitios que también hacen falta sin internet.
 const CDN_HOSTS = ['unpkg.com', 'fonts.googleapis.com', 'fonts.gstatic.com'];

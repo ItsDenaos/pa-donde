@@ -629,6 +629,106 @@ svg.walk { flex: none; width: 20px; height: 20px; fill: none; stroke: currentCol
 
 .route-body { padding: 4px 16px 20px; }
 
+/* ---------- Fotos de la placa y del bus (carrusel) ---------- */
+
+.photos { --photo-h: 160px; position: relative; margin: 6px 0 14px; }
+.photos-track {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  border-radius: 12px;
+}
+.photos-track::-webkit-scrollbar { display: none; }
+/* Cada foto ocupa casi todo el ancho y deja ver un pedazo de la siguiente: así se nota que hay más. */
+.photo {
+  position: relative;
+  flex: 0 0 80%;
+  height: var(--photo-h);
+  margin: 0;
+  overflow: hidden;
+  scroll-snap-align: start;
+  background: var(--hover);
+  border-radius: 12px;
+}
+.photos.single .photo { flex-basis: 100%; }
+.photo-open { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
+.photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.photo-placa img { object-fit: contain; } /* la placa se ve completa, para poder leerla */
+.photo figcaption {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 2px 9px;
+  font: 600 12px/1.5 Inter, sans-serif;
+  color: #fff;
+  background: rgba(5, 16, 38, .72);
+  border-radius: 999px;
+  pointer-events: none;
+}
+/* Sin foto todavía, o no cargó. */
+.photo.is-missing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--panel);
+  border: 2px dashed var(--border);
+}
+.photo-icon { width: 34px; height: 34px; fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.photo.is-missing figcaption { position: static; padding: 0; font-weight: 400; color: var(--muted); text-align: center; background: none; }
+.photo.is-missing figcaption strong { display: block; font-weight: 600; color: var(--text); }
+.photo.is-broken img { visibility: hidden; }
+.photo.is-broken .photo-open { cursor: default; }
+.photo.is-broken::after {
+  content: "No se pudo cargar la foto";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+.photos-nav {
+  position: absolute;
+  top: calc(var(--photo-h) / 2 - 16px);
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+  cursor: pointer;
+}
+.photos-nav svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.photos-nav.prev { left: 6px; }
+.photos-nav.next { right: 6px; }
+.photos-nav.next svg { transform: scaleX(-1); }
+.photos-nav:disabled { opacity: 0; pointer-events: none; }
+/* En el celular se desliza con el dedo: las flechas sobran. */
+@media (hover: none) { .photos-nav { display: none; } }
+.photos-dots { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
+.photos-dots span { width: 7px; height: 7px; background: var(--border); border-radius: 4px; transition: width 0.2s; }
+.photos-dots .on { width: 18px; background: var(--sky); }
+@media (prefers-reduced-motion: reduce) {
+  .photos-track { scroll-behavior: auto; }
+  .photos-dots span { transition: none; }
+}
+
+.photo-dialog { width: min(96vw, 900px); padding: 12px 12px 14px; }
+.photo-dialog img { display: block; width: 100%; max-height: 72dvh; object-fit: contain; background: var(--panel); border-radius: 10px; }
+.photo-dialog p { margin-top: 10px; color: var(--muted); text-align: center; }
+.photo-dialog .dialog-close { display: flex; margin: 12px auto 0; }
+
 .near-info {
   margin: 12px 0 0;
   padding: 9px 11px;
@@ -812,5 +912,6 @@ svg.walk { flex: none; width: 20px; height: 20px; fill: none; stroke: currentCol
   .wordmark { font-size: 20px; }
   .tagline { margin-top: 2px; font-size: 12px; }
   .brand-strip { height: 3px; }
+  .photos { --photo-h: 140px; }
   .leaflet-control-zoom { display: none; }
 }

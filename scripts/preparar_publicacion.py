@@ -11,6 +11,7 @@ compartidos (WhatsApp, Facebook) muestre la imagen: esas apps necesitan la URL c
 Si Netlify construye el sitio, la toma solo de la variable de entorno URL.
 """
 import argparse
+import json
 import os
 import re
 import shutil
@@ -37,7 +38,10 @@ ARCHIVOS = [
     "data/rutas.geojson",
     "data/rutas_amb.geojson",
     "data/lugares.json",
+    "data/fotos.json",
 ]
+# Fotos de la placa y del bus (las prepara scripts/preparar_fotos.py): se copian todas.
+FOTOS = "assets/fotos"
 
 # Encabezados que Netlify agrega a cada respuesta (archivo _headers).
 HEADERS = """/*
@@ -70,6 +74,13 @@ def main():
         destino = SALIDA / archivo
         destino.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(RAIZ / archivo, destino)
+    if (RAIZ / FOTOS).is_dir():
+        shutil.copytree(RAIZ / FOTOS, SALIDA / FOTOS)
+    # Una foto que está en data/fotos.json pero no se subió saldría como "No se pudo cargar".
+    indice = json.loads((RAIZ / "data" / "fotos.json").read_text(encoding="utf-8"))
+    faltan_fotos = [f["src"] for fotos in indice.values() for f in fotos if not (SALIDA / f["src"]).exists()]
+    if faltan_fotos:
+        print(f"Aviso: faltan fotos de data/fotos.json: {', '.join(faltan_fotos)}", file=sys.stderr)
 
     # Cada publicación renueva la copia que guarda el service worker en los celulares.
     sw = SALIDA / "sw.js"

@@ -5,6 +5,10 @@ __pycache__/
 # Primer prototipo, reemplazado por la app actual
 rutas-barranquilla/
 
+# Fotos originales de las placas y los buses: a GitHub va la versión liviana que deja
+# scripts/preparar_fotos.py en assets/fotos/ (la barra inicial evita que se ignore esa carpeta)
+/fotos/
+
 # Configuración local del editor y de Claude
 .claude/
 .vscode/

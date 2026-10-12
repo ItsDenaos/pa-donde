@@ -174,6 +174,34 @@ parques, estadios… de OpenStreetMap. El buscador los sugiere al instante mient
 y completa con [Photon](https://photon.komoot.io), un buscador de OpenStreetMap hecho para
 buscar mientras se escribe (se consulta cuando se deja de escribir, no en cada letra).
 
+### Fotos de la placa y del bus
+
+En Barranquilla la gente reconoce los buses tradicionales por la placa (el cartel con la ruta
+en la ventanilla), así que la ficha de cada ruta tradicional tiene un carrusel con la foto de
+la placa y la del bus. Mientras una ruta no tenga fotos, el carrusel dice "Próximamente".
+
+Para agregarlas:
+
+1. Poner las fotos en la carpeta `fotos/` (en la raíz del proyecto), nombradas con el código
+   de la ruta tal como sale en la app: `C14-placa.jpg`, `C14-bus.jpg` y, si hay más de una del
+   mismo tipo, `C14-placa-2.jpg`. La ida y la vuelta de una ruta comparten las fotos. Sirven
+   JPG, PNG y WebP (en iPhone, las fotos HEIC hay que pasarlas a JPG).
+2. Correr el script (la primera vez hay que instalar Pillow con `pip install pillow`):
+
+   ```bash
+   python scripts/preparar_fotos.py
+   ```
+
+   Achica las fotos (máximo 1280 px, unos 50 KB cada una) para que carguen rápido en celulares
+   de gama baja, les quita los datos de la cámara, incluida la ubicación GPS donde se tomaron, y
+   las deja en `assets/fotos/` con el índice `data/fotos.json`. Avisa si algún nombre está mal
+   escrito o no corresponde a ninguna ruta.
+3. Subir los cambios (`git add -A`, `git commit`, `git push`). La carpeta `fotos/` con los
+   originales no se sube a GitHub; solo las versiones livianas.
+
+Para que el carrusel aparezca solo en las rutas que ya tienen fotos (sin "Próximamente"),
+cambiar `PHOTO_PLACEHOLDERS` a `false` al comienzo de `app.js`.
+
 ### Pasaje
 
 El valor del pasaje y los festivos están al comienzo de `app.js` (`FARE` y `FESTIVOS`).
@@ -189,6 +217,7 @@ a sábado y $3.800 domingos y festivos, igual en colectivos y Transmetro).
 - `assets/icono.svg`: ícono de la marca, también usado como favicon.
 - `scripts/descargar_rutas.py`: descarga y prepara los datos de OpenStreetMap.
 - `scripts/descargar_rutas_amb.py`: descarga los buses colectivos del AMB.
+- `scripts/preparar_fotos.py`: prepara las fotos de la placa y del bus de cada ruta tradicional.
 - `scripts/generar_iconos.py`: dibuja los íconos de la app y la imagen de vista previa al compartir.
 - `scripts/servidor.py`: servidor para probarla en el computador o el celular.
 - `scripts/preparar_publicacion.py` y `netlify.toml`: publicación en Netlify.

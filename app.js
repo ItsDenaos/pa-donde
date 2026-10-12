@@ -5,6 +5,12 @@
 
 const DATA_FILES = ['data/rutas.geojson', 'data/rutas_amb.geojson'];
 const PLACES_FILE = 'data/lugares.json'; // barrios, universidades, centros comerciales… (scripts/descargar_lugares.py)
+// Fotos de la placa (el cartel de la ventanilla) y del bus de cada ruta tradicional, que es como
+// la gente reconoce el bus en la calle. data/fotos.json lo arma scripts/preparar_fotos.py.
+const PHOTOS_FILE = 'data/fotos.json';
+// Mientras una ruta no tenga fotos, el carrusel muestra "Próximamente". Con false, el carrusel
+// solo aparece en las rutas que ya tienen fotos.
+const PHOTO_PLACEHOLDERS = true;
 const AMB_URL = 'https://www.ambq.gov.co/transporte/transporte-publico-colectivo/';
 const CENTER = [10.9685, -74.7813];
 const AREA = L.latLngBounds([10.82, -74.98], [11.11, -74.70]); // misma caja que el script
@@ -41,6 +47,21 @@ const ICONS = {
   reciente: '<svg class="fav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
 };
 const LABELS = { casa: 'Casa', trabajo: 'Trabajo' };
+// Tipos de foto del carrusel, en el orden en que se muestran.
+const PHOTO_TYPES = {
+  placa: {
+    label: 'Placa',
+    alt: 'Placa de la ruta',
+    missing: 'Foto de la placa',
+    icon: '<svg class="photo-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10.5h10M7 14h6"/></svg>',
+  },
+  bus: {
+    label: 'Bus',
+    alt: 'Bus de la ruta',
+    missing: 'Foto del bus',
+    icon: '<svg class="photo-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="14" height="15" rx="3"/><path d="M5 11h14M8.5 21.5v-3M15.5 21.5v-3M8.5 15h.01M15.5 15h.01"/></svg>',
+  },
+};
 const GPS_ICON = '<svg class="fav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><circle cx="12" cy="12" r="7.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22"/></svg>';
 const MAP_ICON = '<svg class="fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 6.5 5.5-2.5 6 2.5 5.5-2.5v13.5L15 20l-6-2.5-5.5 2.5zM9 4v13.5M15 6.5V20"/></svg>';
 const SWAP_ICON = '<svg class="fav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4v15M4.5 7.5 8 4l3.5 3.5M16 20V5M12.5 16.5 16 20l3.5-3.5"/></svg>';
@@ -67,6 +88,7 @@ const state = {
   openCompanies: new Set(), // carpetas desplegadas en la lista (Transmetro y empresas)
   picking: null, // 'casa' | 'trabajo' mientras se elige ese lugar en el buscador
   highlightedStop: null, // { routeId, stop } la estación o parada resaltada
+  photos: {}, // código de ruta tradicional en mayúsculas (C14, A1…) -> [{ src, tipo }] (data/fotos.json)
 };
 let listScroll = 0;
 
@@ -296,6 +318,8 @@ function hideSplash() {
 
 async function loadData() {
   setStatus('loading', 'Cargando rutas…');
+  // Las fotos no son indispensables: sin el archivo, el carrusel queda en "Próximamente".
+  const photosReady = fetch(PHOTOS_FILE).then((res) => (res.ok ? res.json() : {})).catch(() => ({}));
   const results = await Promise.allSettled(DATA_FILES.map(async (url) => {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
@@ -357,6 +381,7 @@ async function loadData() {
   } else {
     setStatus('', '');
   }
+  state.photos = await photosReady;
   renderNetwork();
   renderAbout(files);
   renderList();
@@ -1437,6 +1462,79 @@ function stopsSummary(stops) {
   return parts.join(' y ');
 }
 
+// Carrusel con la placa y el bus, para reconocer la ruta en la calle (solo buses tradicionales:
+// en Transmetro la ruta sale en el letrero del bus y en las estaciones).
+function photosHtml(route) {
+  if (route.fuente !== 'amb') return '';
+  const ref = route.tags.ref || '';
+  const photos = state.photos[ref.toUpperCase()] || [];
+  const slides = Object.entries(PHOTO_TYPES).flatMap(([tipo, info]) => {
+    const own = photos.filter((p) => p.tipo === tipo);
+    if (own.length) return own.map((p) => ({ ...p, info }));
+    return PHOTO_PLACEHOLDERS ? [{ tipo, info, missing: true }] : [];
+  });
+  if (!slides.length) return '';
+  const items = slides.map((s, i) => {
+    if (s.missing) {
+      return `<figure class="photo is-missing">${s.info.icon}<figcaption><strong>${s.info.missing}</strong>Próximamente</figcaption></figure>`;
+    }
+    const alt = escapeHtml(`${s.info.alt} ${ref} de ${route.tags.operator}`);
+    return `<figure class="photo photo-${s.tipo}">
+      <button type="button" class="photo-open" data-photo="${i}" aria-label="Ampliar: ${alt}">
+        <img src="${escapeHtml(s.src)}" alt="${alt}" loading="lazy" decoding="async">
+      </button>
+      <figcaption>${s.info.label}</figcaption>
+    </figure>`;
+  }).join('');
+  const nav = slides.length > 1
+    ? `<button type="button" class="photos-nav prev" data-photos="-1" aria-label="Foto anterior">${BACK}</button>
+      <button type="button" class="photos-nav next" data-photos="1" aria-label="Foto siguiente">${BACK}</button>
+      <div class="photos-dots" aria-hidden="true">${slides.map((_, i) => `<span${i ? '' : ' class="on"'}></span>`).join('')}</div>`
+    : '';
+  return `<div class="photos${slides.length > 1 ? '' : ' single'}" role="group" aria-roledescription="carrusel" aria-label="Fotos de la ruta ${escapeHtml(ref)}">
+    <div class="photos-track" tabindex="0">${items}</div>
+    ${nav}
+  </div>`;
+}
+
+// Se desliza con el dedo; en el computador, con las flechas o el teclado. Los puntos y las
+// flechas siguen la foto que se está viendo.
+function setupPhotos() {
+  const box = els.route.querySelector('.photos');
+  const track = box?.querySelector('.photos-track');
+  if (!track || track.children.length < 2) return;
+  const dots = box.querySelectorAll('.photos-dots span');
+  const prev = box.querySelector('.photos-nav.prev');
+  const next = box.querySelector('.photos-nav.next');
+  const update = () => {
+    const slides = track.children;
+    const step = slides[1].offsetLeft - slides[0].offsetLeft;
+    const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
+    const current = atEnd ? slides.length - 1 : Math.round(track.scrollLeft / step);
+    dots.forEach((dot, i) => dot.classList.toggle('on', i === current));
+    prev.disabled = track.scrollLeft <= 2;
+    next.disabled = atEnd;
+  };
+  track.addEventListener('scroll', update, { passive: true });
+  update();
+}
+
+// Foto ampliada, para leer bien la placa.
+const photoDialog = $('#photo-dialog');
+
+function openPhoto(img) {
+  photoDialog.innerHTML = `
+    <img src="${escapeHtml(img.getAttribute('src'))}" alt="${escapeHtml(img.alt)}">
+    <p>${escapeHtml(img.alt)}</p>
+    <button type="button" class="primary dialog-close" data-action="close-photo">Cerrar</button>`;
+  photoDialog.showModal();
+}
+
+photoDialog.addEventListener('click', (e) => {
+  // Se cierra con el botón o tocando fuera de la foto.
+  if (e.target === photoDialog || e.target.closest('[data-action="close-photo"]')) photoDialog.close();
+});
+
 function renderRoute(route) {
   const t = route.tags;
   const amb = route.fuente === 'amb';
@@ -1490,6 +1588,7 @@ function renderRoute(route) {
       <button type="button" class="star" data-action="share-route" aria-label="Compartir esta ruta" title="Compartir">${SHARE_ICON}</button>
     </div>
     <div class="route-body">
+      ${photosHtml(route)}
       ${nearHtml}
       ${streetsHtml}
       ${stopsHtml}
@@ -1497,6 +1596,7 @@ function renderRoute(route) {
       <p class="muted small">Datos de la ruta: ${amb ? '© Área Metropolitana de Barranquilla (AMB)' : '© colaboradores de OpenStreetMap'}.</p>
       ${reportEnabled() ? '<button type="button" class="link-btn report-btn" data-action="report">Reportar un error en esta ruta</button>' : ''}
     </div>`;
+  setupPhotos();
 }
 
 // ---------- Compartir ----------
@@ -1619,13 +1719,13 @@ reportDialog.addEventListener('click', (e) => {
 
 const guide = $('#guide');
 const GUIDE_KEY = 'padonde:guia-vista';
-const GUIDE_VERSION = '3';
+const GUIDE_VERSION = '4';
 const guideIcon = (svg) => svg.replace('class="fav-icon"', 'class="guide-icon"');
 const GUIDE_STEPS = [
   {
     icon: '<svg class="guide-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>',
     title: 'Busca a dónde vas',
-    text: 'Escribe un lugar, un barrio o una dirección: arriba salen los lugares y, debajo, las rutas que pasan por ahí. Para ver el recorrido de una ruta, tócala en la lista o toca su línea en el mapa.',
+    text: 'Escribe un lugar, un barrio o una dirección: arriba salen los lugares y, debajo, las rutas que pasan por ahí. Para ver el recorrido de una ruta, tócala en la lista o toca su línea en el mapa. En los buses tradicionales, las fotos de la placa y del bus te ayudan a reconocerlo en la calle.',
   },
   {
     icon: '<svg class="guide-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="14" height="15" rx="3"/><path d="M5 11h14M8.5 21.5v-3M15.5 21.5v-3M8.5 15h.01M15.5 15h.01"/></svg>',
@@ -1773,6 +1873,18 @@ els.route.addEventListener('click', (e) => {
     renderRoute(state.routes.find((r) => r.id === state.selectedId));
     return;
   }
+  const photosNav = e.target.closest('[data-photos]');
+  if (photosNav) {
+    const track = photosNav.closest('.photos').querySelector('.photos-track');
+    const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+    track.scrollBy({ left: Number(photosNav.dataset.photos) * (track.children[0].offsetWidth + gap) });
+    return;
+  }
+  const photo = e.target.closest('[data-photo]');
+  if (photo) {
+    if (!photo.closest('.photo').classList.contains('is-broken')) openPhoto(photo.querySelector('img'));
+    return;
+  }
   const more = e.target.closest('[data-action="more-streets"]');
   if (more) {
     const extras = els.route.querySelectorAll('.street-chips .extra');
@@ -1787,6 +1899,11 @@ els.route.addEventListener('click', (e) => {
     highlightStop(route, route.stops[Number(btn.dataset.stop)]);
   }
 });
+
+// Si una foto no carga (sin internet y sin haberla visto antes), se muestra un aviso en su lugar.
+els.route.addEventListener('error', (e) => {
+  if (e.target.tagName === 'IMG') e.target.closest('.photo')?.classList.add('is-broken');
+}, true);
 
 els.trip.addEventListener('click', (e) => {
   const trip = state.trip;
