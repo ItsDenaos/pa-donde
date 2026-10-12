@@ -1,6 +1,9 @@
 # Pa' Donde
 
-Rutas de buses de Barranquilla sobre un mapa, con datos de OpenStreetMap.
+> Tú dices pa’ dónde. Nosotros te llevamos.
+
+Rutas de buses de Barranquilla y su área metropolitana sobre un mapa: Transmetro (datos de
+OpenStreetMap) y buses tradicionales (datos del AMB), con "Cómo llegar" y el valor del pasaje.
 
 ## Correr la app
 

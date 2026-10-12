@@ -287,6 +287,11 @@ function setStatus(kind, html) {
   els.status.innerHTML = html;
 }
 
+// Quita la pantalla de carga (con el logo y el eslogan) cuando la app está lista o si falla.
+function hideSplash() {
+  $('#splash').classList.add('done');
+}
+
 // ---------- Datos ----------
 
 async function loadData() {
@@ -300,6 +305,7 @@ async function loadData() {
   if (files.length === 0) {
     setStatus('error', `No se pudieron leer los datos de rutas. Genéralos con
       <code>python scripts/descargar_rutas.py</code> y <code>python scripts/descargar_rutas_amb.py</code>.`);
+    hideSplash();
     return;
   }
 
@@ -355,6 +361,7 @@ async function loadData() {
   renderAbout(files);
   renderList();
   applyHash();
+  hideSplash();
   maybeShowGuide();
 
   // Lugares para el buscador (no es indispensable: sin el archivo quedan estaciones y paradas).
@@ -1612,7 +1619,7 @@ reportDialog.addEventListener('click', (e) => {
 
 const guide = $('#guide');
 const GUIDE_KEY = 'padonde:guia-vista';
-const GUIDE_VERSION = '2';
+const GUIDE_VERSION = '3';
 const guideIcon = (svg) => svg.replace('class="fav-icon"', 'class="guide-icon"');
 const GUIDE_STEPS = [
   {
@@ -1637,7 +1644,25 @@ const GUIDE_STEPS = [
   },
 ];
 
-function openGuide(step = 0) {
+// Portada antes de los pasos: el logo y el eslogan.
+function guideCoverHtml() {
+  return `
+    <div class="guide-strip" aria-hidden="true"></div>
+    <img class="guide-logo" src="assets/icono.svg" alt="" width="84" height="84">
+    <h2 id="guide-title" class="slogan">Tú dices pa’ dónde.<br><span>Nosotros te llevamos.</span></h2>
+    <p>Encuentra qué bus tomar en Barranquilla y su área metropolitana. Te mostramos cómo en ${GUIDE_STEPS.length} pasos.</p>
+    <div class="dialog-actions">
+      <button type="button" class="link-btn" data-guide="close">Saltar</button>
+      <button type="button" class="primary" data-guide="0">Ver cómo se usa</button>
+    </div>`;
+}
+
+function openGuide(step = 'portada') {
+  if (step === 'portada') {
+    guide.innerHTML = guideCoverHtml();
+    if (!guide.open) guide.showModal();
+    return;
+  }
   const s = GUIDE_STEPS[step];
   const last = step === GUIDE_STEPS.length - 1;
   guide.innerHTML = `
@@ -1669,7 +1694,7 @@ guide.addEventListener('cancel', () => closeGuide()); // tecla Esc
 function maybeShowGuide() {
   let seen = false;
   try { seen = localStorage.getItem(GUIDE_KEY) === GUIDE_VERSION; } catch { seen = true; }
-  if (!seen && state.view === 'browse') openGuide(0);
+  if (!seen && state.view === 'browse') openGuide();
 }
 
 // ---------- Eventos ----------
@@ -1835,7 +1860,7 @@ els.search.addEventListener('focus', () => {
 });
 
 els.hint.addEventListener('click', (e) => {
-  if (e.target.closest('[data-action="open-guide"]')) openGuide(0);
+  if (e.target.closest('[data-action="open-guide"]')) openGuide();
 });
 
 els.near.addEventListener('click', (e) => {
@@ -1868,4 +1893,4 @@ if ('serviceWorker' in navigator && window.isSecureContext) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-loadData();
+loadData().finally(hideSplash);

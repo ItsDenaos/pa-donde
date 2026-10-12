@@ -32,24 +32,25 @@ ICONOS = [
 
 # Vista previa al compartir (1200 x 630, el tamaño que piden WhatsApp, Facebook y X).
 OG_HTML = """<!doctype html><meta charset="utf-8">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500&family=Montserrat:wght@800&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500&family=Montserrat:wght@700;800&display=block">
 <style>
   html, body {{ margin: 0; width: 1200px; height: 630px; overflow: hidden; }}
   body {{ display: flex; align-items: center; gap: 56px; padding: 0 90px; box-sizing: border-box;
          background: #0B3D91; color: #fff; font-family: Inter, "Segoe UI", sans-serif; position: relative; }}
   svg {{ width: 300px; height: 300px; flex: none; }}
   h1 {{ margin: 0; font: 800 108px/1 Montserrat, "Segoe UI", sans-serif; letter-spacing: -2px; }}
-  h1 span {{ color: #00AEEF; }}
-  p {{ margin: 22px 0 0; font-size: 36px; line-height: 1.3; color: #DCE6F7; }}
-  .sub {{ margin-top: 26px; font-size: 26px; color: #9FB6DD; }}
+  h1 span, .eslogan span {{ color: #00AEEF; }}
+  p {{ margin: 0; }}
+  .eslogan {{ margin-top: 28px; font: 700 44px/1.2 Montserrat, "Segoe UI", sans-serif; letter-spacing: -0.5px; }}
+  .sub {{ margin-top: 26px; font-size: 26px; line-height: 1.35; color: #9FB6DD; }}
   .franja {{ position: absolute; left: 0; right: 0; bottom: 0; height: 18px;
             background: linear-gradient(90deg, #7ED321 0 33%, #00AEEF 33% 66%, #FFD600 66%); }}
 </style>
 {svg}
 <div>
   <h1>Pa’ <span>Donde</span></h1>
-  <p>Rutas de buses en Barranquilla<br>y su área metropolitana</p>
-  <p class="sub">Transmetro · Buses tradicionales · Cómo llegar</p>
+  <p class="eslogan">Tú dices pa’ dónde.<br><span>Nosotros te llevamos.</span></p>
+  <p class="sub">Rutas de buses en Barranquilla<br>y su área metropolitana</p>
 </div>
 <div class="franja"></div>"""
 
